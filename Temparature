@@ -1,0 +1,36 @@
+#include <Wire.h>
+#include <LiquidCrystal_I2C.h>
+
+// Typical I2C backpack address; verify/change if your display uses another address.
+LiquidCrystal_I2C lcd(0x27, 16, 2);
+const uint8_t SENSOR_PIN = A0;
+const float ADC_REFERENCE_V = 5.0f;
+const float ADC_COUNTS = 1023.0f;
+const float LM35_MV_PER_C = 10.0f;
+
+void setup() {
+  analogReference(DEFAULT);
+  lcd.init();
+  lcd.backlight();
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("Temperature:");
+}
+
+void loop() {
+  // Average readings to reduce displayed jitter.
+  uint32_t total = 0;
+  for (uint8_t i = 0; i < 16; ++i) {
+    total += analogRead(SENSOR_PIN);
+    delay(5);
+  }
+  const float adc = total / 16.0f;
+  const float voltage = adc * ADC_REFERENCE_V / ADC_COUNTS;
+  const float temperatureC = voltage * 1000.0f / LM35_MV_PER_C;
+
+  lcd.setCursor(0, 1);
+  lcd.print(temperatureC, 1);
+  lcd.print((char)223);
+  lcd.print("C         ");
+  delay(500);
+}
