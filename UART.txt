@@ -1,0 +1,24 @@
+void setup() {
+  Serial.begin(9600);
+}
+
+void loop() {
+  Serial.println("UART Communication Successful");
+  delay(1000);
+}
+
+
+//for the second ardino
+void setup()
+{
+Serial.begin(9600);
+}
+void loop()
+{
+if (Serial.available())
+{
+String data = Serial.readStringUntil("\n");
+Serial.println("Received:");
+Serial.println(data);
+}
+}
