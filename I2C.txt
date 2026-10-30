@@ -1,0 +1,54 @@
+#include <Wire.h>
+
+byte secondsValue = 0;
+byte minutesValue = 0;
+byte hoursValue = 0;
+
+void setup() {
+  Wire.begin();
+  Serial.begin(9600);
+
+  secondsValue = bin2bcd(40);
+  minutesValue = bin2bcd(59);
+  hoursValue = bin2bcd(12);
+
+  // Set seconds, minutes, and hours in DS3231 registers 0x00-0x02.
+  Wire.beginTransmission(0x68);
+  Wire.write((byte)0x00);
+  Wire.write(secondsValue);
+  Wire.write(minutesValue);
+  Wire.write(hoursValue);
+  Wire.endTransmission();
+}
+
+void loop() {
+  Wire.beginTransmission(0x68);
+  Wire.write((byte)0x00);
+  byte status = Wire.endTransmission();
+
+  if (status == 0 && Wire.requestFrom(0x68, (byte)3) == 3) {
+    secondsValue = bcd2bin(Wire.read() & 0x7F);
+    minutesValue = bcd2bin(Wire.read() & 0x7F);
+    hoursValue = bcd2bin(Wire.read() & 0x3F);
+
+    Serial.print(hoursValue);
+    Serial.print(":");
+    if (minutesValue < 10) Serial.print("0");
+    Serial.print(minutesValue);
+    Serial.print(":");
+    if (secondsValue < 10) Serial.print("0");
+    Serial.println(secondsValue);
+  } else {
+    Serial.println("RTC communication error");
+  }
+
+  delay(950);
+}
+
+byte bcd2bin(byte value) {
+  return ((value >> 4) * 10) + (value & 0x0F);
+}
+
+byte bin2bcd(byte value) {
+  return ((value / 10) << 4) | (value % 10);
+}
