@@ -1,0 +1,8 @@
+void setup() {
+  Serial.begin(9600);
+}
+
+void loop() {
+  Serial.println("UART Communication Successful");
+  delay(1000);
+}
